@@ -1,4 +1,5 @@
 from camera import *
+from shapedetector import *
 
 
 cameras = [Camera('USB Cam', 1)]
@@ -27,6 +28,10 @@ while True:
 
                 cv2.drawContours(frame, [contour], -1, (0, 255, 0), 2)
                 cv2.circle(frame, (cX, cY), 7, (255, 255, 255), -1)
+
+                shape = ShapeDetector.detect(contour)
+
+                cv2.putText(frame, shape.name, (cX, cY), cv2.QT_FONT_BLACK, 1, (255, 255, 255), 2)
 
             cv2.imshow(cam.name, frame)
 
