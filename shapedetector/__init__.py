@@ -9,7 +9,8 @@ class ShapeDetector:
     @classmethod
     def detect(cls, contour):
         perimeter = cv2.arcLength(contour, True)
-        approx = cv2.approxPolyDP(contour, 0.04 * perimeter, True)
+        approx = cv2.approxPolyDP(contour, 0.01 * perimeter, True)
+        area = cv2.contourArea(contour)
 
         if len(approx) == 3:
             return shape.TRIANGLE
@@ -23,8 +24,11 @@ class ShapeDetector:
         elif len(approx) == 6:
             return shape.HEXAGON
 
-        else:
+        elif len(approx) > 8 & len(approx) < 23 & int(area > 70):
             return shape.CIRCLE
+
+        else:
+            return shape.UNDEFINED
 
 
 
