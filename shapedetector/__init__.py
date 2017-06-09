@@ -1,5 +1,6 @@
 import cv2
 import shape
+import ellipsedetector
 
 
 class ShapeDetector:
@@ -24,12 +25,13 @@ class ShapeDetector:
         elif len(approx) == 6:
             return shape.HEXAGON
 
-        elif len(approx) > 8 & len(approx) < 23 & int(area > 70):
-            return shape.CIRCLE
+        elif len(approx) > 6 & len(approx) < 25 & int(area > 200):
+            ellipse = ellipsedetector.detect(contour)
+
+            if ellipse is None:
+                return shape.CIRCLE
+            else:
+                return ellipse
 
         else:
             return shape.UNDEFINED
-
-
-
-

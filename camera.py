@@ -13,3 +13,7 @@ class Camera:
     @property
     def cap(self):
         return self._cap
+
+    def snap(self):
+        _, frame = self._cap.read()
+        return frame
