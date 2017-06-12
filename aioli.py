@@ -7,10 +7,8 @@ REQUIRED_WIDTH = 370
 
 cameras = [Camera('USB Cam', 1)]
 
-for cam in cameras:
-    cv2.namedWindow(cam.name)
 
-while True:
+def main():
     for cam in cameras:
         frame = cam.snap()
 
@@ -24,7 +22,6 @@ while True:
 
             if isinstance(shape, ellipsedetector.Ellipse):
                 (x, y), (min_a, max_a), angle = shape.shape
-                # Draw an ellipse around the detected shape
                 cv2.ellipse(frame, shape.shape, (0, 255, 0), 3)
                 cv2.drawContours(frame, [contour], -1, (0, 0, 255), 2)
                 cv2.circle(frame, (int(x), int(y)), int(max_a / 2), (255, 0, 0), 2)
@@ -35,9 +32,16 @@ while True:
         cv2.imshow(cam.name, frame)
         cv2.imshow('canny', frame_processed)
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
 
-for cam in cameras:
-    cam.cap.release()
-cv2.destroyAllWindows()
+if __name__ == '__main__':
+    for cam in cameras:
+        cv2.namedWindow(cam.name)
+
+    while True:
+        main()
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    for cam in cameras:
+        cam.cap.release()
+        cv2.destroyAllWindows()
