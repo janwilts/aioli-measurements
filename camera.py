@@ -32,12 +32,11 @@ class Camera:
 
     def snap_color(self, lower, upper):
         frame = self.snap()
-        frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
         lower_color = np.array(lower)
         upper_color = np.array(upper)
 
-        frame_mask = cv2.inRange(frame_hsv, lower_color, upper_color)
+        frame_mask = cv2.inRange(frame, lower_color, upper_color)
 
         return frame_mask
 
