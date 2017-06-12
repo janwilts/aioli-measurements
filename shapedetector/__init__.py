@@ -25,7 +25,7 @@ class ShapeDetector:
         elif len(approx) == 6:
             return shape.HEXAGON
 
-        elif len(approx) > 6 & len(approx) < 25 & int(area > 200):
+        elif len(approx) > 6 & len(approx) < 25 & int(area) > 15:
             ellipse = ellipsedetector.detect(contour)
 
             if ellipse is None:

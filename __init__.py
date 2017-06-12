@@ -2,6 +2,7 @@ from camera import Camera
 from shapedetector import *
 from shapeprocessor import *
 
+
 REQUIRED_WIDTH = 370
 
 cameras = [Camera('USB Cam', 1)]
@@ -32,6 +33,7 @@ while True:
                 sp.compare_shape(REQUIRED_WIDTH)
 
         cv2.imshow(cam.name, frame)
+        cv2.imshow('canny', frame_processed)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break

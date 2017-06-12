@@ -16,7 +16,5 @@ class Ellipse:
 
 def detect(contour):
     (x, y), (min_a, max_a), angle = cv2.fitEllipse(contour)
-    ellipse = None
-    if max_a / min_a > .2:
-        ellipse = Ellipse(x, y, min_a, max_a, angle)
+    ellipse = Ellipse(x, y, min_a, max_a, angle)
     return ellipse
