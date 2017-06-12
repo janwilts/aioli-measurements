@@ -6,6 +6,7 @@ class ShapeProcessor:
         self._size = size
 
     def compare_shape(self, required):
-        print self._size
-        if self._size == required:
-            print True
+        pass
+        # print self._size
+        # if self._size == required:
+        #    print True

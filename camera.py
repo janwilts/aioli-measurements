@@ -1,5 +1,5 @@
-import cv2
 import numpy as np
+from shapedetector import *
 
 
 class Camera:
@@ -40,3 +40,16 @@ class Camera:
         frame_mask = cv2.inRange(frame_hsv, lower_color, upper_color)
 
         return frame_mask
+
+    @classmethod
+    def find_reference(cls, frame, reference_size_mm):
+        _, frame_contours, _ = cv2.findContours(frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        reference = max(frame_contours, cv2.contourArea)
+
+        shape = ShapeDetector.detect(reference[0])
+
+        if isinstance(shape, ellipsedetector.Ellipse):
+            _, (min_a, max_a), _ = ellipsedetector.detect(reference)
+            return reference_size_mm / max_a, max_a - min_a
+        else:
+            return False, False

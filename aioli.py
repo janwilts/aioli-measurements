@@ -17,6 +17,11 @@ def main():
 
         _, frame_contours, _ = cv2.findContours(frame_processed, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
+        reference_frame = cam.snap_color([0, 0, 0], [255, 255, 255])
+        reference_px_mm, reference_diff = cam.find_reference(reference_frame, 100)
+
+        print reference_diff
+
         for contour in frame_contours:
 
             shape = ShapeDetector.detect(contour)
