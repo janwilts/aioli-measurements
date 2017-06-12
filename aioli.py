@@ -4,6 +4,7 @@ from shapeprocessor import *
 
 
 REQUIRED_WIDTH = 370
+REFERENCE_OBJ_COLOR = ([], [])
 
 cameras = [Camera('USB Cam', 1)]
 
@@ -30,7 +31,7 @@ def main():
                 sp.compare_shape(REQUIRED_WIDTH)
 
         cv2.imshow(cam.name, frame)
-        cv2.imshow('canny', frame_processed)
+        cv2.imshow(cam.name + 'color', cam.snap_color([100, 80, 80], [140, 120, 120]))
 
 
 if __name__ == '__main__':
