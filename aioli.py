@@ -8,7 +8,7 @@ REFERENCE_OBJ_COLOR = ([], [])
 
 cameras = [Camera('USB Cam', 1)]
 
-#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 cv2.namedWindow("controls", 0)
 
 markLowRed = 28
@@ -37,21 +37,22 @@ def setGreenB(x):
     global markUppBlue
     markUppBlue = x
 
-#create trackbar
+# create trackbar
 cv2.createTrackbar('g: r', "controls", 0, 255, setGreenr)
 cv2.createTrackbar('g: g', "controls", 0, 255, setGreeng)
 cv2.createTrackbar('g: b', "controls", 0, 255, setGreenb)
 cv2.createTrackbar('g: R', "controls", 0, 255, setGreenR)
 cv2.createTrackbar('g: G', "controls", 0, 255, setGreenG)
 cv2.createTrackbar('g: B', "controls", 0, 255, setGreenB)
-#set trackbar position
+# set trackbar position
 cv2.setTrackbarPos('g: r', "controls", markLowRed)
 cv2.setTrackbarPos('g: g', "controls", markLowGreen)
 cv2.setTrackbarPos('g: b', "controls", markLowBlue)
 cv2.setTrackbarPos('g: R', "controls", markUppRed)
 cv2.setTrackbarPos('g: G', "controls", markUppGreen)
 cv2.setTrackbarPos('g: B', "controls", markUppBlue)
-#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 
 def main():
     for cam in cameras:
