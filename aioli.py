@@ -1,10 +1,12 @@
 from camera import Camera
+from frame import Frame
 from shapedetector import *
 from shapeprocessor import *
 
 
 REQUIRED_WIDTH = 370
-REFERENCE_OBJ_COLOR = ([], [])
+REFERENCE_COLOR_LOWER = [0, 0, 0]
+REFERENCE_COLOR_UPPER = [0, 0, 0]
 
 cameras = [Camera('USB Cam', 1)]
 
@@ -55,32 +57,35 @@ cv2.setTrackbarPos('g: B', "controls", markUppBlue)
 
 
 def main():
+    # Loop through cameras
     for cam in cameras:
-        frame = cam.snap()
+        image = Frame(cam.snap())
 
-        frame_processed = cam.snap_canny(frame)
+        # Get the difference between ellipse and circle on reference
+        reference = Frame(cam.snap_color(REFERENCE_COLOR_LOWER, REFERENCE_COLOR_UPPER))
+        reference_px_mm, reference_diff = cam.find_reference(reference.frame, 100)
 
-        _, frame_contours, _ = cv2.findContours(frame_processed, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # Snap a frame ad process it, then find the contours
+        processed = Frame(cam.snap_canny(image.frame))
+        contours = processed.contours()
 
-        reference_frame = cam.snap_color([0, 0, 0], [255, 255, 255])
-        reference_px_mm, reference_diff = cam.find_reference(reference_frame, 100)
+        if contours > 2:
+            pass
 
-        print reference_diff
-
-        for contour in frame_contours:
+        for contour in contours:
 
             shape = ShapeDetector.detect(contour)
 
             if isinstance(shape, ellipsedetector.Ellipse):
                 (x, y), (min_a, max_a), angle = shape.shape
-                cv2.ellipse(frame, shape.shape, (0, 255, 0), 3)
-                cv2.drawContours(frame, [contour], -1, (0, 0, 255), 2)
-                cv2.circle(frame, (int(x), int(y)), int(max_a / 2), (255, 0, 0), 2)
+                cv2.ellipse(image.frame, shape.shape, (0, 255, 0), 3)
+                cv2.drawContours(image.frame, [contour], -1, (0, 0, 255), 2)
+                cv2.circle(image.frame, (int(x), int(y)), int(max_a / 2), (255, 0, 0), 2)
 
                 sp = ShapeProcessor(max_a)
                 sp.compare_shape(REQUIRED_WIDTH)
 
-        cv2.imshow(cam.name, frame)
+        cv2.imshow(cam.name, image.frame)
         cv2.imshow(cam.name + 'color', cam.snap_color([markLowBlue, markLowGreen, markLowRed], [markUppBlue, markUppGreen, markUppRed]))
 
 
