@@ -20,6 +20,8 @@ class Camera:
         return frame
 
     def snap_canny(self, image=None, snap=False):
+        """ Creates a canny (outline) image using the snap method """
+
         if snap:
             image = self.snap()
 
@@ -31,6 +33,8 @@ class Camera:
         return image_edges
 
     def snap_color(self, lower, upper):
+        """ Creates a color-filtered image based on the supplied RGB colors """
+
         frame = self.snap()
 
         lower_color = np.array(lower)
@@ -40,15 +44,3 @@ class Camera:
 
         return frame_mask
 
-    @classmethod
-    def find_reference(cls, frame, reference_size_mm):
-        _, frame_contours, _ = cv2.findContours(frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        reference = max(frame_contours, cv2.contourArea)
-
-        shape = ShapeDetector.detect(reference[0])
-
-        if isinstance(shape, ellipsedetector.Ellipse):
-            _, (min_a, max_a), _ = ellipsedetector.detect(reference)
-            return reference_size_mm / max_a, max_a - min_a
-        else:
-            return False, False
