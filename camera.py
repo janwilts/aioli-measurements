@@ -29,8 +29,9 @@ class Camera:
         image_blurred = cv2.GaussianBlur(image_gray, (5, 5), 0)
         image_bilateral = cv2.bilateralFilter(image_blurred, 5, 175, 175)
         image_edges = cv2.Canny(image_bilateral, 100, 200)
+        image_edge_blur = cv2.GaussianBlur(image_edges, (5, 5), 0)
 
-        return image_edges
+        return image_edge_blur
 
     def snap_color(self, lower, upper):
         """ Creates a color-filtered image based on the supplied RGB colors """
