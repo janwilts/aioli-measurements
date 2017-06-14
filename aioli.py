@@ -1,12 +1,13 @@
 import numpy as np
+from crop import crop
 from camera import Camera
 from frame import Frame
-from shapedetector import *
 from shapeprocessor import *
 
 
 REQUIRED_WIDTH = 370
 REFERENCE_SIZE_MM = 100
+TRAY_SIZE = 50
 REFERENCE_COLOR_LOWER = [0, 0, 0]
 REFERENCE_COLOR_UPPER = [0, 0, 0]
 
@@ -57,11 +58,6 @@ cameras = [Camera('USB Cam', 1)]
 # cv2.setTrackbarPos('g: B', "controls", markUppBlue)
 # # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-
-lowest_line = None
-highest_line = None
-crop = None
-
 def main():
     # Loop through cameras
     for cam in cameras:
@@ -80,37 +76,9 @@ def main():
             cv2.imshow(cam.name, image.frame)
             continue
 
-        global highest_line
-        global lowest_line
-        global crop
+        frame_crop = crop(image, lines, TRAY_SIZE)
 
-        height, width, _ = image.frame.shape
-
-        if crop is None:
-            crop = image.frame
-
-        if highest_line is None and lowest_line is None:
-            highest_line = [0, height / 2, width, height / 2]
-            lowest_line = highest_line
-
-        for x1, y1, x2, y2 in lines[0]:
-            line = [0, y1, width, y2]
-            center = (y1 + y2) / 2
-
-            if lowest_line[1] > y1 and lowest_line[3] > y2:
-                lowest_line = line
-                crop = image.frame[center:, 0:]
-                cv2.imshow('crop', crop)
-            elif highest_line[1] < y1 and highest_line[3] < y2:
-                print 'lower'
-                highest_line = line
-                crop = image.frame[:center, 0:]
-                cv2.imshow('crop', crop)
-
-
-
-            cv2.line(image.frame, (0, y1), (width, y2), (0, 0, 255), 2)
-
+        cv2.imshow('crop', frame_crop)
         cv2.imshow(cam.name, image.frame)
         # cv2.imshow(cam.name + 'color', cam.snap_color([markLowBlue, markLowGreen, markLowRed], [markUppBlue, markUppGreen, markUppRed]))
 
