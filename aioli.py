@@ -1,7 +1,7 @@
 import numpy as np
-from crop import crop_image
+from crop import *
 from camera import Camera
-from shapeprocessor import *
+from shapedetector import *
 
 # Constants
 REQUIRED_WIDTH = 370
@@ -10,7 +10,7 @@ REFERENCE_COLOR_LOW = [0, 0, 0]
 REFERENCE_COLOR_UP = [0, 0, 0]
 REFERENCE_SIZE_MM = 100
 
-cameras = [Camera('USB Cam', 1, 'top')]
+cameras = [Camera('USB Cam', 1, 'top-down')]
 
 
 def main():
@@ -30,15 +30,30 @@ def main():
 
         # Return the cropped frame
         crop = crop_image(image, lines, TRAY_SIZE)
+        straights = crop.remove_straights()
+
+        _, straights_contours, _ = cv2.findContours(straights.frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+        for contour in straights_contours:
+            contour_shape = ShapeDetector.detect(contour)
+
+            if isinstance(contour_shape, ellipsedetector.Ellipse):
+                (x, y), (min_a, max_a), angle = contour_shape.shape
+                cv2.ellipse(crop.frame, contour_shape.shape, (0, 255, 0), 3)
+                cv2.drawContours(crop.frame, [contour], -1, (0, 0, 255), 2)
+                cv2.circle(crop.frame, (int(x), int(y)), int(max_a / 2), (255, 0, 0), 2)
 
         cv2.imshow('crop', crop.frame)
+        cv2.imshow('test', straights.frame)
         cv2.imshow(cam.name, image.frame)
+
 
 if __name__ == '__main__':
     for cam in cameras:
         cv2.namedWindow(cam.name)
 
     cv2.namedWindow('crop')
+    cv2.namedWindow('test')
 
     while True:
         main()

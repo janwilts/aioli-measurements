@@ -38,20 +38,23 @@ class Frame:
         else:
             return False, False
 
-    def remove_straights(self, user_frame=None, min_line_length=0, max_line_gap=0, draw_length=100):
+    def remove_straights(self, min_line_length=0, max_line_gap=0, draw_length=100):
+        """ Takes in the cropped images, and removes the straight lines """
+
+        user_frame = self._frame
         user_frame = cv2.GaussianBlur(user_frame, (5, 5), 0)
         gray = cv2.cvtColor(user_frame, cv2.COLOR_BGR2GRAY)
-        edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+        edges = cv2.Canny(gray, 50, 150)
         lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 100, min_line_length, max_line_gap)
         if lines is not None:
             for line in lines:
                 for x1, y1, x2, y2 in line:
                     x = (x1 + x2) / 2
                     y = (y1 + y2) / 2
-                    tanyx = np.arctan((y2 - y1) / (x2 - x1))
-                    x1 = int(x + draw_length * np.cos(tanyx))
-                    y1 = int(y + draw_length * np.sin(tanyx))
-                    x2 = int(x - draw_length * np.cos(tanyx))
-                    y2 = int(y - draw_length * np.sin(tanyx))
+                    tan_yx = np.arctan((y2 - y1) / (x2 - x1))
+                    x1 = int(x + draw_length * np.cos(tan_yx))
+                    y1 = int(y + draw_length * np.sin(tan_yx))
+                    x2 = int(x - draw_length * np.cos(tan_yx))
+                    y2 = int(y - draw_length * np.sin(tan_yx))
                     cv2.line(edges, (x1, y1), (x2, y2), (0, 255, 0), 5)
-        return edges
+        return Frame(edges)

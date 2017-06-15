@@ -7,6 +7,11 @@ highest_line = None
 lowest_line = None
 
 
+def recalibrate():
+    highest_line = None
+    lowest_line = None
+
+
 def crop_image(image, lines, tray_size):
     """ Takes in an image, Hough-Lines, and the width of the tray and returns a cropped image """
     global current_crop
@@ -30,8 +35,6 @@ def crop_image(image, lines, tray_size):
                 lowest_line = line
             elif highest_line[1] < y1 and highest_line[3] < y2:
                 highest_line = line
-
-            cv2.line(image.frame, (0, y1), (image_w, y2), (0, 0, 255), 2)
 
     top_crop = (highest_line[1] + highest_line[3]) / 2 - tray_size
     bottom_crop = (lowest_line[1] + lowest_line[3]) / 2 + tray_size
