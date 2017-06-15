@@ -23,7 +23,7 @@ class Camera:
 
     def snap(self):
         _, frame = self._cap.read()
-        return frame
+        return Frame(frame)
 
     def calibrate(self, reference_color_lower, reference_color_upper, reference_size_mm):
         """ Calibrates the camera by finding the reference object and returning its size in pixels """
@@ -43,12 +43,12 @@ class Camera:
         image_bilateral = cv2.bilateralFilter(image_blurred, 5, 175, 175)
         image_edges = cv2.Canny(image_bilateral, 100, 200)
         image_edge_blur = cv2.GaussianBlur(image_edges, (5, 5), 0)
-        return image_edge_blur
+        return Frame(image_edge_blur)
 
     def snap_color(self, lower, upper):
         """ Creates a color-filtered image based on the supplied RGB colors """
 
-        frame = self.snap()
+        frame = self.snap().frame
 
         lower_color = np.array(lower)
         upper_color = np.array(upper)
