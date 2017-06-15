@@ -38,23 +38,28 @@ class Frame:
         else:
             return False, False
 
-    def remove_straights(self, min_line_length=0, max_line_gap=0, draw_length=100):
+    def remove_straights(self, min_line_length=5, max_line_gap=0, draw_length=50):
         """ Takes in the cropped images, and removes the straight lines """
 
-        user_frame = self._frame
-        user_frame = cv2.GaussianBlur(user_frame, (5, 5), 0)
+        user_frame = cv2.GaussianBlur(self._frame, (5, 5), 0)
         gray = cv2.cvtColor(user_frame, cv2.COLOR_BGR2GRAY)
-        edges = cv2.Canny(gray, 50, 150)
-        lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 100, min_line_length, max_line_gap)
+        edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+        blurred_edges = cv2.GaussianBlur(edges, (5, 5), 0)
+        lines = cv2.HoughLinesP(blurred_edges, 1, np.pi / 180, 110, min_line_length, max_line_gap)
         if lines is not None:
             for line in lines:
                 for x1, y1, x2, y2 in line:
                     x = (x1 + x2) / 2
                     y = (y1 + y2) / 2
-                    tan_yx = np.arctan((y2 - y1) / (x2 - x1))
-                    x1 = int(x + draw_length * np.cos(tan_yx))
-                    y1 = int(y + draw_length * np.sin(tan_yx))
-                    x2 = int(x - draw_length * np.cos(tan_yx))
-                    y2 = int(y - draw_length * np.sin(tan_yx))
-                    cv2.line(edges, (x1, y1), (x2, y2), (0, 255, 0), 5)
+                    dy = float(y2 - y1)
+                    dx = float(x2 - x1)
+                    if dy != 0 and dx != 0:
+                        dydx = dy / dx
+                        tanyx = np.arctan(dydx)
+                        x1 = int(x + draw_length * np.cos(tanyx))
+                        y1 = int(y + draw_length * np.sin(tanyx))
+                        x2 = int(x - draw_length * np.cos(tanyx))
+                        y2 = int(y - draw_length * np.sin(tanyx))
+                        if dydx > 0.3 or dydx < -0.3:
+                            cv2.line(edges, (x1, y1), (x2, y2), (0, 255, 0), 5)
         return Frame(edges)
