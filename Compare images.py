@@ -1,11 +1,9 @@
 import cv2
 import numpy as np
 import math
-from matplotlib import pyplot as plt
 
-def rotate_image(img):
+def rotate_image(img, degrees):
     h, w, _ = img.shape
-    degrees = get_rotation_angle(img)
     center = (w / 2, h / 2)
     M = cv2.getRotationMatrix2D(center, degrees, 1.0)
     rotated = cv2.warpAffine(img, M, (w, h))
@@ -26,20 +24,24 @@ def get_rotation_angle(img):
                     top_l[1] = y1
                 if x2 == top_r[0] and y2 < top_r[1]:
                     top_r[1] = y2
-        degrees = math.degrees(math.atan2(float(top_r[1] - top_l[1]), float(top_r[0] - top_l[0])))
+    degrees = math.degrees(math.atan2(float(top_r[1] - top_l[1]), float(top_r[0] - top_l[0])))
     return degrees
 
 
 cr_px = 25      #cr_px == the amount of Pixels that will be Cropped.
 cap = cv2.VideoCapture(0)
 
-reference_frame = rotate_image(cap.read()[1])
+_, reference_frame = cap.read()
+degrees = get_rotation_angle(reference_frame)
+reference_frame = rotate_image(reference_frame, degrees)
 h, w, _ = reference_frame.shape
 cr_h = h - cr_px
 cr_w = w - cr_px
 
 while True:
-    curr_frame = rotate_image(cap.read()[1])
+    _, curr_frame = cap.read()
+    degrees = get_rotation_angle(curr_frame)
+    curr_frame = rotate_image(curr_frame, degrees)
     curr_frame_crop = curr_frame[cr_px:cr_h, cr_px:cr_w]
 
     # Apply template Matching
@@ -61,7 +63,7 @@ while True:
     if k == 27 or k == ord('c'):
         if k == 27:
             break
-        _, reference = cap.read()
+        reference_frame = rotate_image(cap.read()[1])
 
 
 
