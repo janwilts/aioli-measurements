@@ -1,10 +1,9 @@
 import cv2
-import numpy as np
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
 
-def merge_edges(amount=5):
+def merge_edges(amount):
     new_frame = None
     x = 0
     while x < amount:
