@@ -1,7 +1,7 @@
 from camera import Camera
 from shapedetector import *
 
-# Statics
+# Constants
 CROP_SIZE = 25
 
 # Global variables
