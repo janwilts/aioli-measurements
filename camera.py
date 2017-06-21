@@ -3,9 +3,10 @@ from shapedetector import *
 
 
 class Camera:
-    def __init__(self, name, cap):
+    def __init__(self, name, cap, status=False):
         self._name = name
         self._cap = cv2.VideoCapture(cap)
+        self._status = status
         self._reference = None
 
     @property
@@ -17,9 +18,23 @@ class Camera:
         return self._cap
 
     @property
+    def status(self):
+        return self._status
+
+    @status.setter
+    def status(self, value):
+        self._status = value
+
+    @property
     def reference(self):
         if self._reference is not None:
             return self._reference
+
+    def status(self):
+        test_frame = self.snap()
+        if test_frame.frame is None:
+            return False
+        return True
 
     def snap(self):
         _, frame = self._cap.read()
@@ -35,6 +50,13 @@ class Camera:
         image_gray = cv2.cvtColor(image_blurred, cv2.COLOR_BGR2GRAY)
         image_edges = cv2.Canny(image_gray, 50, 150, apertureSize=3)
         return Frame(image_edges)
+
+    def snap_rotation_reference(self, crop_pixels):
+        frame = self.snap()
+        reference_degrees = frame.get_rotation()
+        reference_frame = frame.rotate_frame(reference_degrees)
+        height, width = reference_frame.shape
+        return reference_frame, height - crop_pixels, width - crop_pixels
 
     def calibrate(self, amount_of_frames):
         """ Calibrates the camera by snapping 5 images and summing them """

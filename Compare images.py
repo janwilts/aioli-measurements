@@ -28,8 +28,8 @@ def get_rotation_angle(img):
     return degrees
 
 
-cr_px = 25      #cr_px == the amount of Pixels that will be Cropped.
-cap = cv2.VideoCapture(0)
+cr_px = 25      # cr_px == the amount of Pixels that will be Cropped.
+cap = cv2.VideoCapture(1)
 
 _, reference_frame = cap.read()
 degrees = get_rotation_angle(reference_frame)
