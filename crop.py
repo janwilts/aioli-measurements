@@ -1,9 +1,7 @@
-import cv2
-import numpy as np
 
 
 def crop_image(lines, height, width):
-    """ Takes in an image, Hough-Lines, and the width of the tray and returns a cropped image """
+    """ Crops an image to specified height and using supplied lines """
     if lines is not None:
         top_left = [0, height]
         top_right = [width - 1, height]
