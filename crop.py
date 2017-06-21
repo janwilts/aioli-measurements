@@ -1,42 +1,16 @@
-import cv2
-from frame import Frame
-
-# Global variables
-current_crop = None
-highest_line = None
-lowest_line = None
 
 
-def recalibrate():
-    highest_line = None
-    lowest_line = None
+def crop_image(lines, height, width):
+    """ Crops an image to specified height and using supplied lines """
+    if lines is not None:
+        top_left = [0, height]
+        top_right = [width - 1, height]
 
+        for line in lines:
+            for x1, y1, x2, y2 in line:
+                if x1 == top_left[0] and y1 < top_left[1]:
+                    top_left[1] = y1
+                if x2 == top_right[0] and y2 < top_right[1]:
+                    top_right[1] = y2
 
-def crop_image(image, lines, tray_size):
-    """ Takes in an image, Hough-Lines, and the width of the tray and returns a cropped image """
-    global current_crop
-    global highest_line
-    global lowest_line
-
-    image_h, image_w, _ = image.frame.shape
-
-    if current_crop is None:
-        current_crop = image.frame
-
-    if highest_line is None and lowest_line is None:
-        highest_line = [0, image_h / 2, image_w, image_h / 2]
-        lowest_line = highest_line
-
-    for x in lines:
-        for x1, y1, x2, y2 in x:
-            line = [0, y1, image_w, y2]
-
-            if lowest_line[1] > y1 and lowest_line[3] > y2:
-                lowest_line = line
-            elif highest_line[1] < y1 and highest_line[3] < y2:
-                highest_line = line
-
-    top_crop = (highest_line[1] + highest_line[3]) / 2 - tray_size
-    bottom_crop = (lowest_line[1] + lowest_line[3]) / 2 + tray_size
-
-    return Frame(image.frame[bottom_crop:top_crop, 0:])
+        return top_left, top_right

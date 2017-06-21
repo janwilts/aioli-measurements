@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from crop import crop_image
 from shapedetector import *
 
 
@@ -17,7 +18,6 @@ class Frame:
         return height, width
 
     def get_rotation(self):
-        top_right, top_left = [], []
         height, width = self.shape
 
         frame_gray = cv2.cvtColor(self._frame, cv2.COLOR_BGR2GRAY)
@@ -25,16 +25,7 @@ class Frame:
         frame_blurred_edges = cv2.GaussianBlur(frame_edges, (5, 5), 0)
         frame_lines = cv2.HoughLinesP(frame_blurred_edges, 1, np.pi / 100, 150, 50, 10)
 
-        if frame_lines is not None:
-            top_left = [0, height]
-            top_right = [width - 1, height]
-
-            for line in frame_lines:
-                for x1, y1, x2, y2 in line:
-                    if x1 == top_left[0] and y1 < top_left[1]:
-                        top_left[1] = y1
-                    if x2 == top_right[0] and y2 < top_right[1]:
-                        top_right[1] = y2
+        top_left, top_right = crop_image(frame_lines, height, width)
 
         return math.degrees(math.atan2(float(top_right[1] - top_left[1]), float(top_right[0] - top_left[0])))
 
