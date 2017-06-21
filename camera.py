@@ -30,6 +30,15 @@ class Camera:
         if self._reference is not None:
             return self._reference
 
+    @property
+    def reference_canny(self):
+        if self._reference_canny is not None:
+            return self._reference_canny
+
+    @property
+    def angle_smoothing_array(self):
+        return self._angle_smoothing_array
+
     def status(self):
         test_frame = self.snap()
         if test_frame.frame is None:
@@ -51,15 +60,19 @@ class Camera:
         image_edges = cv2.Canny(image_gray, 50, 150, apertureSize=3)
         return Frame(image_edges)
 
-    def snap_rotation_reference(self, crop_pixels):
+    def snap_rotation(self, crop_pixels):
         frame = self.snap()
-        reference_degrees = frame.get_rotation()
-        reference_frame = frame.rotate_frame(reference_degrees)
-        height, width = reference_frame.shape
-        return reference_frame, height - crop_pixels, width - crop_pixels
+        rotation_angle = frame.get_rotation()
+        rotated_frame = frame.rotate_frame(rotation_angle)
+
+        height, width = rotated_frame.shape
+        rotated_frame_crop = rotated_frame.frame[crop_pixels:height - 2*crop_pixels, crop_pixels:width - 2*crop_pixels]
+        return Frame(rotated_frame_crop)
+
 
     def calibrate(self, amount_of_frames):
         """ Calibrates the camera by snapping 5 images and summing them """
+        self._reference = self.snap_rotation(0)
 
         total_frame = None
         for i in xrange(0, amount_of_frames, 1):
@@ -68,4 +81,4 @@ class Camera:
                 total_frame += image.frame
             else:
                 total_frame = image.frame
-        self._reference = Frame(total_frame)
+        self._reference_canny = Frame(total_frame)

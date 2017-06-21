@@ -5,7 +5,7 @@ from shapedetector import *
 CROP_SIZE = 25
 
 # Global variables
-cameras = [Camera('USB Cam', 1)]
+cameras = [Camera('USB Cam', 0)]
 cameras_status = False
 
 
@@ -13,23 +13,20 @@ def main():
     """ Main, function, entry point """
     for cam in cameras:
         if cam.cap.isOpened():
-            reference, crop_height, crop_width = cam.snap_rotation_reference(CROP_SIZE)
+            rotated_frame_crop = cam.snap_rotation(CROP_SIZE)
+            reference = cam.reference
+            height, width, _ = reference.frame.shape
 
-            frame = cam.snap()
-            rotation_degrees = frame.get_rotation()
-            rotated_frame = frame.rotate_frame(rotation_degrees)
-            rotated_frame_crop = rotated_frame.frame[CROP_SIZE:crop_height, CROP_SIZE:crop_width]
-
-            matched_result = cv2.matchTemplate(rotated_frame_crop, reference.frame, cv2.TM_CCOEFF)
+            matched_result = cv2.matchTemplate(rotated_frame_crop.frame, cam.reference.frame, cv2.TM_CCOEFF)
             _, _, _, max_loc = cv2.minMaxLoc(matched_result)
             top_left = max_loc
-            bottom_right = (top_left[0] + crop_width - CROP_SIZE, top_left[1] + crop_height - CROP_SIZE)
+            bottom_right = (top_left[0] + width - 2*CROP_SIZE, top_left[1] + height - 2*CROP_SIZE)
 
             reference_crop = reference.frame[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
 
             frame_edges = cam.snap_canny(snap=True)
 
-            subtracted_edges = frame_edges.subtract(cam.reference)
+            subtracted_edges = frame_edges.subtract(cam.reference_canny)
             contours = subtracted_edges.thresh_contours()
 
             for contour in contours:
