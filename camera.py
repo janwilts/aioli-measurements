@@ -61,8 +61,12 @@ class Camera:
         image_edges = cv2.Canny(image_gray, 50, 150, apertureSize=3)
         return Frame(image_edges)
 
-    def snap_rotation(self, crop_pixels):
-        frame = self.snap()
+    def snap_rotation(self, crop_pixels, frame=None):
+        """ Snaps a rotated image, by using some external frame-methods """
+
+        if frame is None:
+            frame = self.snap()
+
         rotation_angle = frame.get_rotation()
         rotated_frame = frame.rotate_frame(rotation_angle)
 
@@ -77,9 +81,10 @@ class Camera:
 
         total_frame = None
         for i in xrange(0, amount_of_frames, 1):
-            image = self.snap_canny(snap=True)
+            canny = self.snap_canny(self._reference.frame)
             if i > 0:
-                total_frame += image.frame
+                total_frame += canny.frame
             else:
-                total_frame = image.frame
+                total_frame = canny.frame
+
         self._reference_canny = Frame(total_frame)

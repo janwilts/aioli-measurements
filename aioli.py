@@ -37,6 +37,7 @@ def main():
             cv2.imshow('subtracted', subtracted_edges.frame)
             cv2.imshow('reference', cam.reference.frame)
             cv2.imshow('reference-crop', reference_crop)
+            cv2.imshow('reference-canny', cam.reference_canny.frame)
 
 
 def camera_status():
