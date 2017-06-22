@@ -14,3 +14,6 @@ def crop_image(lines, height, width):
                     top_right[1] = y2
 
         return top_left, top_right
+
+    else:
+        return False, False

@@ -8,6 +8,7 @@ class Camera:
         self._cap = cv2.VideoCapture(cap)
         self._status = status
         self._reference = None
+        self._reference_canny = None
 
     @property
     def name(self):
@@ -69,9 +70,9 @@ class Camera:
         rotated_frame_crop = rotated_frame.frame[crop_pixels:height - 2*crop_pixels, crop_pixels:width - 2*crop_pixels]
         return Frame(rotated_frame_crop)
 
-
     def calibrate(self, amount_of_frames):
         """ Calibrates the camera by snapping 5 images and summing them """
+
         self._reference = self.snap_rotation(0)
 
         total_frame = None
