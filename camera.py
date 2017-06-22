@@ -10,6 +10,7 @@ class Camera:
         self._status = status
         self._reference = None
         self._angle_smoothing_array = [0, 0, 0, 0, 0]
+        self._reference_canny = None
 
     @property
     def name(self):

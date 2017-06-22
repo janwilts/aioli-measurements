@@ -5,7 +5,7 @@ from shapedetector import *
 CROP_SIZE = 25
 
 # Global variables
-cameras = [Camera('USB Cam', 0)]
+cameras = [Camera('USB Cam', 1)]
 cameras_status = False
 
 
@@ -18,8 +18,7 @@ def main():
             height, width, _ = reference.frame.shape
 
             matched_result = cv2.matchTemplate(rotated_frame_crop.frame, cam.reference.frame, cv2.TM_CCOEFF)
-            _, _, _, max_loc = cv2.minMaxLoc(matched_result)
-            top_left = max_loc
+            _, _, _, top_left = cv2.minMaxLoc(matched_result)
             bottom_right = (top_left[0] + width - 2*CROP_SIZE, top_left[1] + height - 2*CROP_SIZE)
 
             reference_crop = reference.frame[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]

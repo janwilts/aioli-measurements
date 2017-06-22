@@ -27,7 +27,11 @@ class Frame:
 
         top_left, top_right = crop_image(frame_lines, height, width)
 
-        return math.degrees(math.atan2(float(top_right[1] - top_left[1]), float(top_right[0] - top_left[0])))
+        if top_left and top_right:
+            return math.degrees(math.atan2(float(top_right[1] - top_left[1]), float(top_right[0] - top_left[0])))
+
+        else:
+            return 0
 
     def rotate_frame(self, degrees):
         """ Rotates an image using a rotation matrix, arguments: degrees to rotate """
