@@ -32,10 +32,11 @@ def main():
             for contour in contours:
                 contour_area = cv2.contourArea(contour)
                 if contour_area > 5:
-                    print contour_area
+                    break
 
-            cv2.imshow('edges', frame_edges.frame)
-            cv2.imshow('subtracted', subtracted_edges.frame)
+            #cv2.imshow('edges', frame_edges.frame)
+            #cv2.imshow('subtracted', subtracted_edges.frame)
+            cv2.imshow('rotated-frame-crop', rotated_frame_crop.frame)
             cv2.imshow('reference', cam.reference.frame)
             cv2.imshow('reference-crop', reference_crop)
 

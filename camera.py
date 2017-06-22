@@ -1,4 +1,5 @@
 from frame import Frame
+import numpy as np
 from shapedetector import *
 
 
@@ -8,6 +9,7 @@ class Camera:
         self._cap = cv2.VideoCapture(cap)
         self._status = status
         self._reference = None
+        self._angle_smoothing_array = [0, 0, 0, 0, 0]
 
     @property
     def name(self):
@@ -37,6 +39,8 @@ class Camera:
 
     @property
     def angle_smoothing_array(self):
+        if self._angle_smoothing_array is not None:
+            return self._angle_smoothing_array
         return self._angle_smoothing_array
 
     def status(self):
@@ -63,16 +67,47 @@ class Camera:
     def snap_rotation(self, crop_pixels):
         frame = self.snap()
         rotation_angle = frame.get_rotation()
-        rotated_frame = frame.rotate_frame(rotation_angle)
+        angle_array = self.insert_angle(self.angle_smoothing_array, rotation_angle, -15, 15)
+        self._angle_smoothing_array = angle_array
+        smoothed_angle = self.smooth_angle(angle_array, 1.5)
+
+        rotated_frame = frame.rotate_frame(smoothed_angle)
 
         height, width = rotated_frame.shape
         rotated_frame_crop = rotated_frame.frame[crop_pixels:height - 2*crop_pixels, crop_pixels:width - 2*crop_pixels]
         return Frame(rotated_frame_crop)
 
+    def insert_angle(self, array, new_angle, min_angle, max_angle):
+        if max_angle > new_angle > min_angle:
+            array.append(new_angle)
+            array.remove(array[0])
+        print array
+        return array
+
+    def smooth_angle(self, array, difference_threshold):
+        groups = [[array[0]]]
+        for x in xrange(1, len(array)):
+            for y in xrange(0, len(groups)):
+                if np.mean(groups[y]) - difference_threshold < array[x] < np.mean(groups[y]) + difference_threshold:
+                    groups[y].append(array[x])
+                else:
+                    groups.append([array[x]])
+        group_found = False
+        for group in groups:
+            if len(group) > (len(array) / 2):
+                smoothed_angle = np.mean(group)
+                group_found = True
+        if not group_found:
+            print 'WARNING: Rotation measurements are spread too much'
+            smoothed_angle = array[len(array)-1]
+        return smoothed_angle
 
     def calibrate(self, amount_of_frames):
         """ Calibrates the camera by snapping 5 images and summing them """
-        self._reference = self.snap_rotation(0)
+        frame = self.snap()
+        rotation_angle = frame.get_rotation()
+        rotated_frame = frame.rotate_frame(rotation_angle)
+        self._reference = rotated_frame
 
         total_frame = None
         for i in xrange(0, amount_of_frames, 1):
