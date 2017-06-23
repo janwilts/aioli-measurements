@@ -140,18 +140,9 @@ class Camera:
             frame, angle_array = self.snap_calibration_frame(angle_array)
             calibration_frames.append(frame.frame)
 
-<<<<<<< HEAD
-        reference, angle = self.snap_rotation(0)
-        reference_height, reference_width = reference.shape
-        radians = math.radians(angle)
-        crop_rotated_image(radians, reference_height, reference_width)
-
-        self._reference = reference
-=======
         smoothed_angle, group_size = self.smooth_angle(angle_array, 1.5)
         if group_size < len(angle_array) - 1:
             return False
->>>>>>> 44908df3087328dc096d1e360051464b9b407921
 
         total_frame = None
         for i in xrange(0, amount_of_frames, 1):
