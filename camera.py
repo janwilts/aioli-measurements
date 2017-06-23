@@ -4,11 +4,9 @@ from frame import Frame
 import numpy as np
 from shapedetector import *
 
-# Constants
-angle_smoothing_length = 5
 
 class Camera:
-    def __init__(self, name, cap, status=False):
+    def __init__(self, name, cap, angle_smoothing_length, status=False):
         self._name = name
         self._cap = cv2.VideoCapture(cap)
         self._status = status
@@ -16,7 +14,7 @@ class Camera:
         self._reference_canny = None
         self._angle_smoothing_array = []
         for i in xrange(0, angle_smoothing_length, 1):
-            self.angle_smoothing_array.append(None)
+            self._angle_smoothing_array.append(None)
 
     @property
     def name(self):
@@ -77,7 +75,7 @@ class Camera:
                 angle_array.append(rotation_angle)
             else:
                 angle_array[0] = rotation_angle
-            self.insert_angle(self.angle_smoothing_array, rotation_angle, -15, 15)
+            self.insert_angle(self._angle_smoothing_array, rotation_angle, -15, 15)
         return Frame(frame), angle_array
 
     def snap_rotation(self, crop_pixels, frame=None):
@@ -87,14 +85,14 @@ class Camera:
             frame = self.snap()
 
         rotation_angle = frame.get_rotation()
-        angle_array = self.insert_angle(self.angle_smoothing_array, rotation_angle, -15, 15)
+        angle_array = self.insert_angle(self._angle_smoothing_array, rotation_angle, -15, 15)
         self._angle_smoothing_array = angle_array
         smoothed_angle, _ = self.smooth_angle(angle_array, 1.5)
 
         rotated_frame = frame.rotate_frame(smoothed_angle)
         height, width = rotated_frame.shape
-        rotated_frame_crop = rotated_frame.frame[crop_pixels:height - 2*crop_pixels, crop_pixels:width - 2*crop_pixels]
-        return Frame(rotated_frame_crop), rotation_angle
+        rotated_frame_crop = rotated_frame.frame[crop_pixels:height - crop_pixels, crop_pixels:width - crop_pixels]
+        return Frame(rotated_frame_crop), smoothed_angle
 
     def insert_angle(self, array, new_angle, min_angle, max_angle):
         if max_angle > new_angle > min_angle:
@@ -147,7 +145,7 @@ class Camera:
         total_frame = None
         for i in xrange(0, amount_of_frames, 1):
             calibration_frames[i] = calibration_frames[i].rotate_frame(smoothed_angle)
-            canny = self.snap_canny(calibration_frames[i])
+            canny = self.snap_canny(calibration_frames[i].frame)
 
             if i > 0:
                 total_frame += canny.frame

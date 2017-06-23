@@ -1,11 +1,13 @@
+from frame import Frame
 from camera import Camera
 from shapedetector import *
 
 # Constants
 CROP_SIZE = 25
+ANGLE_SMOOTHING_LENGTH = 5
 
 # Global variables
-cameras = [Camera('USB Cam', 0)]
+cameras = [Camera('USB Cam', 1, ANGLE_SMOOTHING_LENGTH)]
 cameras_status = False
 
 
@@ -21,11 +23,16 @@ def main():
             _, _, _, top_left = cv2.minMaxLoc(matched_result)
             bottom_right = (top_left[0] + width - 2 * CROP_SIZE, top_left[1] + height - 2 * CROP_SIZE)
 
-            reference_crop = reference.frame[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
+            reference_crop = cam.reference_canny.frame[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
 
-            frame_edges = cam.snap_canny(rotated_frame_crop)
+            frame_edges = cam.snap_canny(rotated_frame_crop.frame)
 
-            subtracted_edges = frame_edges.subtract(cam.reference_canny)
+            subtracted_edges = frame_edges.subtract(reference_crop)
+
+            zero = cv2.countNonZero(subtracted_edges.frame)
+            print zero
+            size = subtracted_edges.frame.size
+            print (cv2.countNonZero(subtracted_edges.frame) / subtracted_edges.frame.size) * 100
             contours = subtracted_edges.thresh_contours()
 
             for contour in contours:

@@ -35,6 +35,7 @@ class Frame:
 
     def rotate_frame(self, degrees):
         """ Rotates an image using a rotation matrix, arguments: degrees to rotate """
+
         height, width = self.shape
         center_point = (width / 2, height / 2)
         rotation_matrix = cv2.getRotationMatrix2D(center_point, degrees, 1.0)
@@ -42,7 +43,7 @@ class Frame:
         return Frame(rotated_image)
 
     def subtract(self, subtracting):
-        return Frame(self._frame - subtracting.frame)
+        return Frame(self._frame - subtracting)
 
     def thresh_contours(self):
         _, thresh = cv2.threshold(self._frame, 127, 255, 0)
