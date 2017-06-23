@@ -5,7 +5,7 @@ from shapedetector import *
 CROP_SIZE = 25
 
 # Global variables
-cameras = [Camera('USB Cam', 1)]
+cameras = [Camera('USB Cam', 0)]
 cameras_status = False
 
 
@@ -15,15 +15,15 @@ def main():
         if cam.cap.isOpened():
             rotated_frame_crop = cam.snap_rotation(CROP_SIZE)
             reference = cam.reference
-            height, width, _ = reference.frame.shape
+            height, width = reference.shape
 
-            matched_result = cv2.matchTemplate(rotated_frame_crop.frame, cam.reference.frame, cv2.TM_CCOEFF)
+            matched_result = cv2.matchTemplate(rotated_frame_crop.frame, reference.frame, cv2.TM_CCOEFF)
             _, _, _, top_left = cv2.minMaxLoc(matched_result)
             bottom_right = (top_left[0] + width - 2*CROP_SIZE, top_left[1] + height - 2*CROP_SIZE)
 
             reference_crop = reference.frame[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
 
-            frame_edges = cam.snap_canny(snap=True)
+            frame_edges = cam.snap_canny(rotated_frame_crop)
 
             subtracted_edges = frame_edges.subtract(cam.reference_canny)
             contours = subtracted_edges.thresh_contours()
@@ -33,10 +33,10 @@ def main():
                 if contour_area > 5:
                     break
 
-            #cv2.imshow('edges', frame_edges.frame)
-            #cv2.imshow('subtracted', subtracted_edges.frame)
+            cv2.imshow('edges', frame_edges.frame)
+            cv2.imshow('subtracted', subtracted_edges.frame)
             cv2.imshow('rotated-frame-crop', rotated_frame_crop.frame)
-            cv2.imshow('reference', cam.reference.frame)
+            cv2.imshow('reference', reference.frame)
             cv2.imshow('reference-crop', reference_crop)
 
 
@@ -59,14 +59,21 @@ def camera_status():
 if __name__ == '__main__':
     # Entry point
     for cam in cameras:
-        cv2.namedWindow(cam.name)
+        #cv2.namedWindow(cam.name)
         if cam.status():
-            cam.calibrate(5)
+            calibration_completed = False
+            while not calibration_completed:
+                calibration_completed = cam.calibrate(5)
 
     while camera_status():
         main()
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        k = cv2.waitKey(1) & 0xFF
+        if k == 27 or k == ord('q') or k == ord('c'):
+            if k == 27 or ord('q'):
+                break
+            calibration_completed = False
+            while not calibration_completed:
+                calibration_completed = cam.calibrate(5)
 
     for cam in cameras:
         cam.cap.release()
