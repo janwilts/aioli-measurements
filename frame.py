@@ -17,6 +17,14 @@ class Frame:
         height, width, _ = self._frame.shape
         return height, width
 
+    @property
+    def binary(self, inv=False):
+        thresh = cv2.THRESH_BINARY
+        if inv:
+            thresh = cv2.THRESH_BINARY_INV
+        _, output = cv2.threshold(self._frame, 127, 255, thresh)
+        return Frame(output)
+
     def get_rotation(self):
         """ looks in the most left and most right rows of the frame, finds the first edges and calculates the angle """
         _, width = self.shape
