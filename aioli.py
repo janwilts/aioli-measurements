@@ -28,11 +28,8 @@ def main():
             frame_edges = cam.snap_canny(rotated_frame_crop.frame)
 
             subtracted_edges = frame_edges.subtract(reference_crop)
-
-            zero = cv2.countNonZero(subtracted_edges.frame)
-            print zero
-            size = subtracted_edges.frame.size
-            print (cv2.countNonZero(subtracted_edges.frame) / subtracted_edges.frame.size) * 100
+            binary = subtracted_edges.binary
+            print cv2.countNonZero(binary.frame)
             contours = subtracted_edges.thresh_contours()
 
             for contour in contours:
@@ -46,6 +43,7 @@ def main():
             cv2.imshow('reference', reference.frame)
             cv2.imshow('reference-crop', reference_crop)
             cv2.imshow('reference-canny', cam.reference_canny.frame)
+            cv2.imshow('binary', binary.frame)
 
 
 def camera_status():
