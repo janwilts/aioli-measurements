@@ -13,17 +13,17 @@ def main():
     """ Main, function, entry point """
     for cam in cameras:
         if cam.cap.isOpened():
-            rotated_frame_crop = cam.snap_rotation(CROP_SIZE)
+            rotated_frame_crop, _ = cam.snap_rotation(CROP_SIZE)
             reference = cam.reference
             height, width, _ = reference.frame.shape
 
             matched_result = cv2.matchTemplate(rotated_frame_crop.frame, cam.reference.frame, cv2.TM_CCOEFF)
             _, _, _, top_left = cv2.minMaxLoc(matched_result)
-            bottom_right = (top_left[0] + width - 2*CROP_SIZE, top_left[1] + height - 2*CROP_SIZE)
+            bottom_right = (top_left[0] + width - 2 * CROP_SIZE, top_left[1] + height - 2 * CROP_SIZE)
 
             reference_crop = reference.frame[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
 
-            frame_edges = cam.snap_canny(snap=True)
+            frame_edges = cam.snap_canny()
 
             subtracted_edges = frame_edges.subtract(cam.reference_canny)
             contours = subtracted_edges.thresh_contours()

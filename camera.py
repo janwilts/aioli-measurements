@@ -1,3 +1,5 @@
+import math
+from crop import crop_rotated_image
 from frame import Frame
 from shapedetector import *
 
@@ -50,13 +52,13 @@ class Camera:
         _, frame = self._cap.read()
         return Frame(frame)
 
-    def snap_canny(self, image=None, snap=False):
+    def snap_canny(self, frame=None):
         """ Creates a canny (outline) image using the snap method """
 
-        if snap:
-            image = self.snap().frame
+        if frame is None:
+            frame = self.snap().frame
 
-        image_blurred = cv2.GaussianBlur(image, (5, 5), 0)
+        image_blurred = cv2.GaussianBlur(frame, (5, 5), 0)
         image_gray = cv2.cvtColor(image_blurred, cv2.COLOR_BGR2GRAY)
         image_edges = cv2.Canny(image_gray, 50, 150, apertureSize=3)
         return Frame(image_edges)
@@ -72,12 +74,17 @@ class Camera:
 
         height, width = rotated_frame.shape
         rotated_frame_crop = rotated_frame.frame[crop_pixels:height - 2*crop_pixels, crop_pixels:width - 2*crop_pixels]
-        return Frame(rotated_frame_crop)
+        return Frame(rotated_frame_crop), rotation_angle
 
     def calibrate(self, amount_of_frames):
         """ Calibrates the camera by snapping 5 images and summing them """
 
-        self._reference = self.snap_rotation(0)
+        reference, angle = self.snap_rotation(0)
+        reference_height, reference_width = reference.shape
+        radians = math.radians(angle)
+        crop_rotated_image(radians, reference_height, reference_width)
+
+        self._reference = reference
 
         total_frame = None
         for i in xrange(0, amount_of_frames, 1):
