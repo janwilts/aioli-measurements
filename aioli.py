@@ -23,11 +23,11 @@ def main():
             _, _, _, top_left = cv2.minMaxLoc(matched_result)
             bottom_right = (top_left[0] + width - 2 * CROP_SIZE, top_left[1] + height - 2 * CROP_SIZE)
 
-            reference_crop = cam.reference_canny.frame[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
+            reference_canny_crop = cam.reference_canny.frame[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
 
             frame_edges = cam.snap_canny(rotated_frame_crop.frame)
 
-            subtracted_edges = frame_edges.subtract(reference_crop)
+            subtracted_edges = frame_edges.subtract(reference_canny_crop)
 
             binary = subtracted_edges.binary
             print cv2.countNonZero(binary.frame)
@@ -39,11 +39,11 @@ def main():
                     break
 
             cv2.imshow('edges', frame_edges.frame)
-            cv2.imshow('subtracted', subtracted_edges.frame)
             cv2.imshow('rotated-frame-crop', rotated_frame_crop.frame)
-            cv2.imshow('reference', reference.frame)
-            cv2.imshow('reference-crop', reference_crop)
+            #cv2.imshow('reference', reference.frame)
+            cv2.imshow('reference-crop', reference_canny_crop)
             cv2.imshow('reference-canny', cam.reference_canny.frame)
+            cv2.imshow('subtracted', subtracted_edges.frame)
             cv2.imshow('binary', binary.frame)
 
 
