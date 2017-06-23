@@ -78,8 +78,12 @@ class Camera:
             self.insert_angle(self.angle_smoothing_array, rotation_angle, -15, 15)
         return Frame(frame), angle_array
 
-    def snap_rotation(self, crop_pixels):
-        frame = self.snap()
+    def snap_rotation(self, crop_pixels, frame=None):
+        """ Snaps a rotated image, by using some external frame-methods """
+
+        if frame is None:
+            frame = self.snap()
+
         rotation_angle = frame.get_rotation()
         angle_array = self.insert_angle(self.angle_smoothing_array, rotation_angle, -15, 15)
         self._angle_smoothing_array = angle_array
@@ -141,11 +145,13 @@ class Camera:
         total_frame = None
         for i in xrange(0, amount_of_frames, 1):
             calibration_frames[i] = calibration_frames[i].rotate_frame(smoothed_angle)
-            image = self.snap_canny(calibration_frames[i])
+            canny = self.snap_canny(calibration_frames[i])
+
             if i > 0:
-                total_frame += image.frame
+                total_frame += canny.frame
             else:
-                total_frame = image.frame
+                total_frame = canny.frame
+
         self._reference_canny = Frame(total_frame)
         self._reference = Frame(calibration_frames[amount_of_frames - 1].frame)
         return True

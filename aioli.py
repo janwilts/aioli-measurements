@@ -38,6 +38,7 @@ def main():
             cv2.imshow('rotated-frame-crop', rotated_frame_crop.frame)
             cv2.imshow('reference', reference.frame)
             cv2.imshow('reference-crop', reference_crop)
+            cv2.imshow('reference-canny', cam.reference_canny.frame)
 
 
 def camera_status():
@@ -71,9 +72,10 @@ if __name__ == '__main__':
         if k == 27 or k == ord('q') or k == ord('c'):
             if k == 27 or ord('q'):
                 break
-            calibration_completed = False
-            while not calibration_completed:
-                calibration_completed = cam.calibrate(5)
+            else:
+                calibration_completed = False
+                while not calibration_completed:
+                    calibration_completed = cam.calibrate(5)
 
     for cam in cameras:
         cam.cap.release()
