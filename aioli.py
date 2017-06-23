@@ -7,7 +7,7 @@ CROP_SIZE = 25
 ANGLE_SMOOTHING_LENGTH = 5
 
 # Global variables
-cameras = [Camera('USB Cam', 1, ANGLE_SMOOTHING_LENGTH)]
+cameras = [Camera('USB Cam', 0, ANGLE_SMOOTHING_LENGTH)]
 cameras_status = False
 
 
@@ -30,9 +30,9 @@ def main():
             subtracted_edges = frame_edges.subtract(reference_crop)
 
             zero = cv2.countNonZero(subtracted_edges.frame)
-            print zero
+            #print zero
             size = subtracted_edges.frame.size
-            print (cv2.countNonZero(subtracted_edges.frame) / subtracted_edges.frame.size) * 100
+            #print (cv2.countNonZero(subtracted_edges.frame) / subtracted_edges.frame.size) * 100
             contours = subtracted_edges.thresh_contours()
 
             for contour in contours:
@@ -77,7 +77,7 @@ if __name__ == '__main__':
         main()
         k = cv2.waitKey(1) & 0xFF
         if k == 27 or k == ord('q') or k == ord('c'):
-            if k == 27 or ord('q'):
+            if k == 27 or k == ord('q'):
                 break
             else:
                 calibration_completed = False

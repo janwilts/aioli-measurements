@@ -98,7 +98,6 @@ class Camera:
         if max_angle > new_angle > min_angle:
             array.append(new_angle)
             array.remove(array[0])
-        print array
         return array
 
     def smooth_angle(self, array, difference_threshold):
