@@ -1,8 +1,13 @@
+import socket
+import pickle
+import struct
 from frame import Frame
 from camera import Camera
 from shapedetector import *
 
 # Constants
+HOST = 'localhost'
+PORT = 8082
 CROP_SIZE = 25
 ANGLE_SMOOTHING_LENGTH = 5
 
@@ -65,6 +70,15 @@ def camera_status():
 
 if __name__ == '__main__':
     # Entry point
+    web_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    web_socket.bind((HOST, PORT))
+    web_socket.listen(.1)
+
+    connection, address = web_socket.accept()
+
+    connection_data = ''
+    payload_size = struct.calcsize('H')
+
     for cam in cameras:
         #cv2.namedWindow(cam.name)
         if cam.status():
