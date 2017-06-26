@@ -23,7 +23,7 @@ class Frame:
         if inv:
             thresh = cv2.THRESH_BINARY_INV
         _, output = cv2.threshold(self._frame, 127, 255, thresh)
-        return Frame(output)
+        return output
 
     def get_rotation(self):
         """ looks in the most left and most right rows of the frame, finds the first edges and calculates the angle """
@@ -48,7 +48,6 @@ class Frame:
             count += 1
 
         return math.degrees(math.atan2(top_right - top_left, width+1))
-
 
     def rotate_frame(self, degrees):
         """ Rotates an image using a rotation matrix, arguments: degrees to rotate """

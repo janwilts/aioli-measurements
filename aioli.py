@@ -5,6 +5,7 @@ from shapedetector import *
 # Constants
 CROP_SIZE = 25
 ANGLE_SMOOTHING_LENGTH = 5
+CALIBRATION_SAMPLES = 5
 
 # Global variables
 cameras = [Camera('USB Cam', 0, ANGLE_SMOOTHING_LENGTH)]
@@ -30,7 +31,7 @@ def main():
             subtracted_edges = frame_edges.subtract(reference_canny_crop)
 
             binary = subtracted_edges.binary
-            print cv2.countNonZero(binary.frame)
+            print cv2.countNonZero(binary)
             contours = subtracted_edges.thresh_contours()
 
             for contour in contours:
@@ -44,7 +45,7 @@ def main():
             cv2.imshow('reference-crop', reference_canny_crop)
             cv2.imshow('reference-canny', cam.reference_canny.frame)
             cv2.imshow('subtracted', subtracted_edges.frame)
-            cv2.imshow('binary', binary.frame)
+            cv2.imshow('binary', binary)
 
 
 def camera_status():
@@ -70,7 +71,7 @@ if __name__ == '__main__':
         if cam.status():
             calibration_completed = False
             while not calibration_completed:
-                calibration_completed = cam.calibrate(5)
+                calibration_completed = cam.calibrate(CALIBRATION_SAMPLES)
 
     while camera_status():
         main()
@@ -81,7 +82,7 @@ if __name__ == '__main__':
             else:
                 calibration_completed = False
                 while not calibration_completed:
-                    calibration_completed = cam.calibrate(5)
+                    calibration_completed = cam.calibrate(CALIBRATION_SAMPLES)
 
     for cam in cameras:
         cam.cap.release()
