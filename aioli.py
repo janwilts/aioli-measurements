@@ -29,7 +29,10 @@ def main():
 
             subtracted_edges = frame_edges.subtract(reference_crop)
             binary = subtracted_edges.binary
-            print cv2.countNonZero(binary.frame)
+
+            non_zeros = cv2.countNonZero(binary.frame)
+            percentage_whites = float(non_zeros) / float(binary.frame.size) * 100.0
+
             contours = subtracted_edges.thresh_contours()
 
             for contour in contours:
