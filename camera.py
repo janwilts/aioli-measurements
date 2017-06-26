@@ -15,6 +15,8 @@ class Camera:
         self._angle_smoothing_array = []
         for i in xrange(0, angle_smoothing_length, 1):
             self._angle_smoothing_array.append(None)
+        self._cap.set(3, 1080)
+        self._cap.set(4, 1080)
 
     @property
     def name(self):
@@ -98,7 +100,6 @@ class Camera:
         if max_angle > new_angle > min_angle:
             array.append(new_angle)
             array.remove(array[0])
-        print array
         return array
 
     def smooth_angle(self, array, difference_threshold):

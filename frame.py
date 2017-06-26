@@ -26,20 +26,29 @@ class Frame:
         return Frame(output)
 
     def get_rotation(self):
-        height, width = self.shape
+        """ looks in the most left and most right rows of the frame, finds the first edges and calculates the angle """
+        _, width = self.shape
+        width -= 1
 
         frame_gray = cv2.cvtColor(self._frame, cv2.COLOR_BGR2GRAY)
         frame_edges = cv2.Canny(frame_gray, 50, 150, 0)
-        frame_blurred_edges = cv2.GaussianBlur(frame_edges, (5, 5), 0)
-        frame_lines = cv2.HoughLinesP(frame_blurred_edges, 1, np.pi / 100, 150, 50, 10)
 
-        top_left, top_right = crop_image(frame_lines, height, width)
+        top_left = 0
+        top_right = 0
+        count = 0.0
+        for x in frame_edges:
+            if x[0] == 255 and top_left == 0:
+                top_left = count
+                if top_right > 0:
+                    break
+            if x[width] == 255 and top_right == 0:
+                top_right = count
+                if top_left > 0:
+                    break
+            count += 1
 
-        if top_left and top_right:
-            return math.degrees(math.atan2(float(top_right[1] - top_left[1]), float(top_right[0] - top_left[0])))
+        return math.degrees(math.atan2(top_right - top_left, width+1))
 
-        else:
-            return 0
 
     def rotate_frame(self, degrees):
         """ Rotates an image using a rotation matrix, arguments: degrees to rotate """
