@@ -1,6 +1,6 @@
 import numpy as np
 from crop import *
-from camera import Camera
+from frameprocessor import FrameProcessor
 from shapedetector import *
 
 # Constants
@@ -10,7 +10,7 @@ REFERENCE_COLOR_LOW = [0, 0, 0]
 REFERENCE_COLOR_UP = [0, 0, 0]
 REFERENCE_SIZE_MM = 100
 
-cameras = [Camera('USB Cam', 0, 'top-down')]
+cameras = [FrameProcessor('USB Cam', 0, 'top-down')]
 
 
 def main():
@@ -21,7 +21,7 @@ def main():
         reference_px_mm, reference_diff = camera.calibrate(REFERENCE_COLOR_LOW, REFERENCE_COLOR_UP, REFERENCE_SIZE_MM)
 
         # Snap a frame ad process it, then find the contours
-        processed = camera.snap_canny(image.frame)
+        processed = camera.frame_canny(image.frame)
         lines = cv2.HoughLinesP(processed.frame, 1, np.pi / 180, 400)
 
         if lines is None:

@@ -1,43 +1,20 @@
-import math
-from crop import crop_rotated_image
-from frame import Frame
 import numpy as np
 from shapedetector import *
+from frame import Frame
 
 
-class Camera:
-    def __init__(self, name, cap, angle_smoothing_length, status=False):
-        self._name = name
-        self._cap = cv2.VideoCapture(cap)
-        self._status = status
+class FrameProcessor:
+    def __init__(self, angle_smoothing_length):
         self._reference = None
         self._reference_canny = None
         self._angle_smoothing_array = []
-        for i in xrange(0, angle_smoothing_length, 1):
+        for i in xrange(angle_smoothing_length):
             self._angle_smoothing_array.append(None)
-        self._cap.set(3, 1080)
-        self._cap.set(4, 1080)
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def cap(self):
-        return self._cap
-
-    @property
-    def status(self):
-        return self._status
-
-    @status.setter
-    def status(self, value):
-        self._status = value
 
     @property
     def reference(self):
         if self._reference is not None:
-            return self._reference
+            return Frame(self._reference)
 
     @property
     def reference_canny(self):
@@ -48,29 +25,17 @@ class Camera:
     def angle_smoothing_array(self):
         return self._angle_smoothing_array
 
-    def status(self):
-        test_frame = self.snap()
-        if test_frame.frame is None:
-            return False
-        return True
-
-    def snap(self):
-        _, frame = self._cap.read()
-        return Frame(frame)
-
-    def snap_canny(self, frame=None):
+    @classmethod
+    def frame_canny(cls, frame):
         """ Creates a canny (outline) image using the snap method """
-
-        if frame is None:
-            frame = self.snap().frame
 
         image_blurred = cv2.GaussianBlur(frame, (5, 5), 0)
         image_gray = cv2.cvtColor(image_blurred, cv2.COLOR_BGR2GRAY)
         image_edges = cv2.Canny(image_gray, 50, 150, apertureSize=3)
         return Frame(image_edges)
 
-    def snap_calibration_frame(self, angle_array):
-        frame = self.snap()
+    def get_calibration_frame(self, angle_array, frame):
+
         rotation_angle = frame.get_rotation()
         if 15 > rotation_angle > -15:
             if angle_array[0] is not None:
@@ -80,11 +45,8 @@ class Camera:
             self.insert_angle(self._angle_smoothing_array, rotation_angle, -15, 15)
         return Frame(frame), angle_array
 
-    def snap_rotation(self, crop_pixels, frame=None):
+    def frame_rotation(self, crop_pixels, frame):
         """ Snaps a rotated image, by using some external frame-methods """
-
-        if frame is None:
-            frame = self.snap()
 
         rotation_angle = frame.get_rotation()
         angle_array = self.insert_angle(self._angle_smoothing_array, rotation_angle, -15, 15)
@@ -96,14 +58,18 @@ class Camera:
         rotated_frame_crop = rotated_frame.frame[crop_pixels:height - crop_pixels, crop_pixels:width - crop_pixels]
         return Frame(rotated_frame_crop), smoothed_angle
 
-    def insert_angle(self, array, new_angle, min_angle, max_angle):
+    @classmethod
+    def insert_angle(cls, array, new_angle, min_angle, max_angle):
+
         if max_angle > new_angle > min_angle:
             array.append(new_angle)
             array.remove(array[0])
         return array
 
-    def smooth_angle(self, array, difference_threshold):
+    @classmethod
+    def smooth_angle(cls, array, difference_threshold):
         """  """
+
         groups = [[]]
         for i in xrange(1, len(array)):
             if array[0] is None:
@@ -131,12 +97,13 @@ class Camera:
             smoothed_angle = array[len(array)-1]
         return smoothed_angle, group_size
 
-    def calibrate(self, amount_of_frames):
+    def calibrate(self, amount_of_frames, frame):
         """ Calibrates the camera by snapping x amount of images and rotating them according to the smoothed angle """
+
         calibration_frames = []
         angle_array = [None]
         for i in xrange(0, amount_of_frames, 1):
-            frame, angle_array = self.snap_calibration_frame(angle_array)
+            frame, angle_array = self.get_calibration_frame(angle_array, frame)
             calibration_frames.append(frame.frame)
 
         smoothed_angle, group_size = self.smooth_angle(angle_array, 1.5)
@@ -146,7 +113,7 @@ class Camera:
         total_frame = None
         for i in xrange(0, amount_of_frames, 1):
             calibration_frames[i] = calibration_frames[i].rotate_frame(smoothed_angle)
-            canny = self.snap_canny(calibration_frames[i].frame)
+            canny = self.frame_canny(calibration_frames[i].frame)
 
             if i > 0:
                 total_frame += canny.frame
@@ -155,4 +122,4 @@ class Camera:
 
         self._reference_canny = Frame(total_frame)
         self._reference = Frame(calibration_frames[amount_of_frames - 1].frame)
-        return True
+        return self._reference.frame, self._reference_canny
