@@ -17,6 +17,7 @@ class Camera:
             self._angle_smoothing_array.append(None)
         self._cap.set(3, 1080)
         self._cap.set(4, 1080)
+        self._reference_marker_pos = None
 
     @property
     def name(self):
@@ -47,6 +48,14 @@ class Camera:
     @property
     def angle_smoothing_array(self):
         return self._angle_smoothing_array
+
+    @property
+    def reference_marker_pos(self):
+        if self._reference_marker_pos is None:
+            self._reference_marker_pos = self.reference_canny.get_marker_pos(200, 10, 4, 50)
+        return self._reference_marker_pos
+
+
 
     def status(self):
         test_frame = self.snap()
@@ -131,6 +140,19 @@ class Camera:
             smoothed_angle = array[len(array)-1]
         return smoothed_angle, group_size
 
+    def get_top_left(self, reference_marker_pos, frame_marker_pos, crop_size):
+        x = reference_marker_pos[0] - frame_marker_pos[0]
+        y = reference_marker_pos[1] - frame_marker_pos[1]
+        if x > 2 * crop_size:
+            x = 2 * crop_size
+        if x < 0:
+            x = 0
+        if y > 2 * crop_size:
+            y = 2 * crop_size
+        if y < 0:
+            y = 0
+        return (y, x)
+
     def calibrate(self, amount_of_frames):
         """ Calibrates the camera by snapping x amount of images and rotating them according to the smoothed angle """
         calibration_frames = []
@@ -153,6 +175,9 @@ class Camera:
             else:
                 total_frame = canny.frame
 
-        self._reference_canny = Frame(total_frame)
+        total_frame_blurred = Frame(cv2.blur(total_frame, (3, 3), 0))
+        total_frame_blurred = total_frame_blurred.binary(60, 255)
+
+        self._reference_canny = Frame(total_frame_blurred)
         self._reference = Frame(calibration_frames[amount_of_frames - 1].frame)
         return True

@@ -17,12 +17,11 @@ class Frame:
         height, width, _ = self._frame.shape
         return height, width
 
-    @property
-    def binary(self, inv=False):
+    def binary(self, min_thresh, max_thresh, inv=False):
         thresh = cv2.THRESH_BINARY
         if inv:
             thresh = cv2.THRESH_BINARY_INV
-        _, output = cv2.threshold(self._frame, 127, 255, thresh)
+        _, output = cv2.threshold(self._frame, min_thresh, max_thresh, thresh)
         return output
 
     def get_rotation(self):
@@ -57,6 +56,30 @@ class Frame:
         rotation_matrix = cv2.getRotationMatrix2D(center_point, degrees, 1.0)
         rotated_image = cv2.warpAffine(self._frame, rotation_matrix, (width, height))
         return Frame(rotated_image)
+
+    def get_marker_pos(self, min_val, line_range, line_tresh, skip_edge_pixels=5):
+        height, width = self._frame.shape
+        frame_edges = self._frame
+
+        xpos = 0
+        ypos = 0
+        for row in frame_edges[:height/2]:
+            if row[0] > min_val or row[width-1]:
+                x = xpos
+                y = skip_edge_pixels
+                for col in row[:width/2]:
+                    count_values = []
+                    for z in xrange(line_range):
+                        if frame_edges[x-z][y] > min_val:
+                            count_values.append(True)
+                    if len(count_values) > line_tresh:
+                        ypos = y
+                        break
+                    y += 1
+            if ypos > 0:
+                return (xpos, ypos)
+            xpos += 1
+        return (xpos, ypos)
 
     def subtract(self, subtracting):
         return Frame(self._frame - subtracting)

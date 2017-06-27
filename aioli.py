@@ -3,7 +3,7 @@ from camera import Camera
 from shapedetector import *
 
 # Constants
-CROP_SIZE = 25
+CROP_SIZE = 50
 ANGLE_SMOOTHING_LENGTH = 5
 CALIBRATION_SAMPLES = 5
 
@@ -17,20 +17,29 @@ def main():
     for cam in cameras:
         if cam.cap.isOpened():
             rotated_frame_crop, _ = cam.snap_rotation(CROP_SIZE)
+            frame_edges = cam.snap_canny(rotated_frame_crop.frame)
             reference = cam.reference
+            reference_canny = cam.reference_canny
             height, width = reference.shape
+
+                # This code is using very exact reference points. This makes it perfect when the product-strip and reference point
+                # are completely straight and the edges are really sharp. Due to slight variations in the canny function due to camera
+                # movement this would read the marker to be one more pixel to the left/right compared to the other vertical lines.
+                # Same story for the horizontal lines.
+            # frame_marker = frame_edges.get_marker_pos(200, 10, 4)
+            # reference_marker = cam.reference_marker_pos
+            # top_left = cam.get_top_left(reference_marker, frame_marker, CROP_SIZE)
+            # bottom_right = (top_left[0] + width - 2 * CROP_SIZE, top_left[1] + height - 2 * CROP_SIZE)
 
             matched_result = cv2.matchTemplate(rotated_frame_crop.frame, reference.frame, cv2.TM_CCOEFF)
             _, _, _, top_left = cv2.minMaxLoc(matched_result)
             bottom_right = (top_left[0] + width - 2 * CROP_SIZE, top_left[1] + height - 2 * CROP_SIZE)
 
-            reference_canny_crop = cam.reference_canny.frame[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
-
-            frame_edges = cam.snap_canny(rotated_frame_crop.frame)
+            reference_canny_crop = reference_canny.frame[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
 
             subtracted_edges = frame_edges.subtract(reference_canny_crop)
 
-            binary = subtracted_edges.binary
+            binary = subtracted_edges.binary(127, 255)
             print cv2.countNonZero(binary)
             contours = subtracted_edges.thresh_contours()
 
