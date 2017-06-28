@@ -17,7 +17,8 @@ class Camera:
             self._angle_smoothing_array.append(None)
         self._cap.set(3, 1080)
         self._cap.set(4, 1080)
-        self._reference_marker_pos = None
+            # Unused code from the marker detection
+        # self._reference_marker_pos = None
 
     @property
     def name(self):
@@ -49,13 +50,12 @@ class Camera:
     def angle_smoothing_array(self):
         return self._angle_smoothing_array
 
-    @property
-    def reference_marker_pos(self):
-        if self._reference_marker_pos is None:
-            self._reference_marker_pos = self.reference_canny.get_marker_pos(200, 10, 4, 50)
-        return self._reference_marker_pos
-
-
+        #Unused code from the marker detection
+    # @property
+    # def reference_marker_pos(self):
+    #     if self._reference_marker_pos is None:
+    #         self._reference_marker_pos = self.reference_canny.get_marker_pos(200, 10, 4, 50)
+    #     return self._reference_marker_pos
 
     def status(self):
         test_frame = self.snap()
@@ -175,7 +175,7 @@ class Camera:
             else:
                 total_frame = canny.frame
 
-        total_frame_blurred = Frame(cv2.blur(total_frame, (3, 3), 0))
+        total_frame_blurred = Frame(cv2.blur(total_frame, (4, 4), 0))
         total_frame_blurred = total_frame_blurred.binary(60, 255)
 
         self._reference_canny = Frame(total_frame_blurred)

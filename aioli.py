@@ -8,7 +8,7 @@ ANGLE_SMOOTHING_LENGTH = 5
 CALIBRATION_SAMPLES = 5
 
 # Global variables
-cameras = [Camera('USB Cam', 0, ANGLE_SMOOTHING_LENGTH)]
+cameras = [Camera('USB Cam0', 0, ANGLE_SMOOTHING_LENGTH)]
 cameras_status = False
 
 
@@ -22,6 +22,7 @@ def main():
             reference_canny = cam.reference_canny
             height, width = reference.shape
 
+                # Unused code from the marker detection
                 # This code is using very exact reference points. This makes it perfect when the product-strip and reference point
                 # are completely straight and the edges are really sharp. Due to slight variations in the canny function due to camera
                 # movement this would read the marker to be one more pixel to the left/right compared to the other vertical lines.
@@ -39,22 +40,16 @@ def main():
 
             subtracted_edges = frame_edges.subtract(reference_canny_crop)
 
-            binary = subtracted_edges.binary(127, 255)
-            print cv2.countNonZero(binary)
             contours = subtracted_edges.thresh_contours()
-
             for contour in contours:
-                contour_area = cv2.contourArea(contour)
-                if contour_area > 5:
-                    break
+                cv2.drawContours(subtracted_edges.frame, [contour], -1, (0, 0, 0), 3)
+                if contour.size > 75:
+                    cv2.drawContours(subtracted_edges.frame, [contour], -1, (255, 255, 255), 1)
+                    cv2.drawContours(rotated_frame_crop.frame, [contour], -1, (0, 0, contour.size), 3)
+                    print contour.size
 
-            cv2.imshow('edges', frame_edges.frame)
-            cv2.imshow('rotated-frame-crop', rotated_frame_crop.frame)
-            #cv2.imshow('reference', reference.frame)
-            cv2.imshow('reference-crop', reference_canny_crop)
-            cv2.imshow('reference-canny', cam.reference_canny.frame)
-            cv2.imshow('subtracted', subtracted_edges.frame)
-            cv2.imshow('binary', binary)
+            cv2.imshow(cam.name + ' error visualised', rotated_frame_crop.frame)
+            cv2.imshow(cam.name + ' result', subtracted_edges.frame)
 
 
 def camera_status():
@@ -76,7 +71,6 @@ def camera_status():
 if __name__ == '__main__':
     # Entry point
     for cam in cameras:
-        #cv2.namedWindow(cam.name)
         if cam.status():
             calibration_completed = False
             while not calibration_completed:
@@ -89,9 +83,10 @@ if __name__ == '__main__':
             if k == 27 or k == ord('q'):
                 break
             else:
-                calibration_completed = False
-                while not calibration_completed:
-                    calibration_completed = cam.calibrate(CALIBRATION_SAMPLES)
+                for cam in cameras:
+                    calibration_completed = False
+                    while not calibration_completed:
+                        calibration_completed = cam.calibrate(CALIBRATION_SAMPLES)
 
     for cam in cameras:
         cam.cap.release()
