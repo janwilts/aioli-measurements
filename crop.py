@@ -28,16 +28,16 @@ def crop_rotated_image(angle, height, width):
     width_is_longer = width >= height
     side_long, side_short = (width, height) if width_is_longer else (height, width)
 
-    # since the solutions for angle, -angle and 180-angle are all the same,
-    # if suffices to look at the first quadrant and the absolute values of sin,cos:
+    # Since the solutions for angle, -angle and 180-angle are all the same,
+    # If suffices to look at the first quadrant and the absolute values of sin,cos:
     sin_a, cos_a = abs(math.sin(angle)), abs(math.cos(angle))
     if side_short <= 2. * sin_a * cos_a * side_long:
-        # half constrained case: two crop corners touch the longer side,
-        #   the other two corners are on the mid-line parallel to the longer line
+        # Half constrained case: two crop corners touch the longer side,
+        # The other two corners are on the mid-line parallel to the longer line
         x = 0.5 * side_short
         max_width, max_height = (x / sin_a, x / cos_a) if width_is_longer else (x / cos_a, x / sin_a)
     else:
-        # fully constrained case: crop touches all 4 sides
+        # Fully constrained case: crop touches all 4 sides
         cos_2a = cos_a * cos_a - sin_a * sin_a
         max_width, max_height = (width * cos_a - height * sin_a) / cos_2a, (height * cos_a - width * sin_a) / cos_2a
 

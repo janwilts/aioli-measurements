@@ -6,3 +6,5 @@ The AIOLI measurment system is an intelligent, open-source way to measure object
 * **O**pen-Source, the source code is entirely Open-Source
 * **L**ow-cost, the entire system can be run on any OS with cheap webcams
 * **I**ntelligent, the software is automatically adjusting measurements to nullify camera angles
+
+This system only requires the OpenCV library
