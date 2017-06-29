@@ -46,7 +46,6 @@ def main():
                 if contour.size > 75:
                     cv2.drawContours(subtracted_edges.frame, [contour], -1, (255, 255, 255), 1)
                     cv2.drawContours(rotated_frame_crop.frame, [contour], -1, (0, 0, contour.size), 3)
-                    print contour.size
 
             cv2.imshow(cam.name + ' error visualised', rotated_frame_crop.frame)
             cv2.imshow(cam.name + ' result', subtracted_edges.frame)
